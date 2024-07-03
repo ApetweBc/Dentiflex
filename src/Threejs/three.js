@@ -206,34 +206,6 @@ export default function Three() {
     });
 
 
-
-
-
-    // stlLoader.load("assets/LowerJaw.stl", function (loadedGeometry) {
-    //   geometry = loadedGeometry;
-    //   // Create a mesh with the geometry and a material
-    //   // The material can be customized with different colors and settings
-    //   // Here, we use a simple material with the color gray
-    //   stlModel = new THREE.Mesh(geometry, solidMaterial);
-    //   // Call initDat here after stlModel is defined
-    //   initDat();
-    //   // Set initial size of the object
-    //   // Compute the bounding box and center the geometry
-    //   geometry.computeBoundingBox(); // Compute the bounding box
-    //   const boundingBox = geometry.boundingBox;
-    //   const center = new THREE.Vector3();
-    //   boundingBox.getCenter(center); // Get the center of the bounding box
-    //   geometry.center(); // Center the geometry
-    //   const size = boundingBox.getSize(new THREE.Vector3()); // Get the size of the bounding box
-    //   const maxDimension = Math.max(size.x, size.y, size.z); // Get the maximum dimension
-    //   const scaleFactor = 50 / maxDimension; // Set initial scale factor
-    //   stlModel.scale.set(scaleFactor, scaleFactor, scaleFactor); // Scale the model
-    //   stlModel.rotation.x = Math.PI / 2; // Rotate the model to the desired orientation
-    //   stlModel.rotation.y = 0;
-    //   stlModel.rotation.z = Math.PI / 1; // No rotation around Z axis
-    //   scene.add(stlModel);
-    // });
-
     const loadSTLFile = (arrayBuffer) => {
         const geometry = stlLoader.parse(arrayBuffer);
         if (stlModel) {
@@ -251,9 +223,6 @@ export default function Three() {
         const maxDimension = Math.max(size.x, size.y, size.z);
         const scaleFactor = 50 / maxDimension;
         stlModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        // stlModel.rotation.x = Math.PI / 2;
-        // stlModel.rotation.y = 0;
-        // stlModel.rotation.z = Math.PI / 1;
         stlModel.rotation.set(0, 0, 0);
         scene.add(stlModel);
       };
