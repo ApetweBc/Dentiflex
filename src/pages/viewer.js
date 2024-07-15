@@ -4,7 +4,6 @@ import { ToastContainer, toast } from "react-toastify";
 
 import Dropzone from "@/Threejs/drop";
 import { Inter } from "next/font/google";
-import Layout from "@/components/layout";
 import Logo from "./../Threejs/logo";
 import Three from "@/Threejs/three";
 
@@ -14,10 +13,27 @@ const handleFilesAccepted = (files) => {
     if (file.name.endsWith(".stl")) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const contents = e.target.result;
-        document.dispatchEvent(
-          new CustomEvent("loadSTL", { detail: contents })
-        );
+        const arrayBuffer = e.target.result;
+        const filePath = file.name;
+        console.log("Filepath:", filePath);
+        //  Want to store the file to the server 
+       //const nameOfFile = file.name;
+       const formData = new FormData();
+       formData.append("file", file);
+       fetch("./api/upload.js", {
+         method: "POST",
+         body: formData,
+         
+       })
+         .then((response) => response.json())
+         .then((result) => {
+           console.log("Success:", result);
+           const loadSTLEvent = new CustomEvent('loadSTL', { detail: { arrayBuffer, filePath } });
+           document.dispatchEvent(loadSTLEvent);
+         })
+         .catch((error) => {
+           console.error("Error:", error);
+         });
       };
       reader.readAsArrayBuffer(file);
     } else {
@@ -52,6 +68,10 @@ export default function Viewer() {
         className="absolute bottom-4 right-10"
       /> */}
        <Logo />
+       <div id="linkContainer">
+        <button id="generateLinkButton">Generate Shareable Link</button>
+        <div id="generatedLink"></div>
+    </div>
       <canvas id="myThreeJsCanva" />
     </main>
   

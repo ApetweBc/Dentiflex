@@ -206,13 +206,16 @@ export default function Three() {
     });
 
 
-    const loadSTLFile = (arrayBuffer) => {
+    const loadSTLFile = (arrayBuffer, filePath ) => {
+      
         const geometry = stlLoader.parse(arrayBuffer);
         if (stlModel) {
-            scene.remove(stlModel);
-            }
-            stlModel = new THREE.Mesh(geometry, solidMaterial);
-            console.log(stlModel);
+          scene.remove(stlModel);
+          initializeSceneFromUrl(stlModel);
+        }
+        stlModel = new THREE.Mesh(geometry, solidMaterial);
+        console.log(stlModel);
+        console.log(filePath);
             initDat();
         geometry.computeBoundingBox();
         const boundingBox = geometry.boundingBox;
@@ -227,7 +230,13 @@ export default function Three() {
         scene.add(stlModel);
       };
 
-      document.addEventListener('loadSTL', (event) => loadSTLFile(event.detail));
+      document.addEventListener('loadSTL', (event) => {
+        const {arrayBuffer, filePath} = event.detail;
+        loadSTLFile(arrayBuffer, filePath);
+        // console the file path  
+      });
+      
+      
 
 
     // Limit the canvas size to fit within the window
@@ -365,7 +374,14 @@ export default function Three() {
     //   }
     // }
 
+// Add Event Listener to Generate Shareable Link Button
+const generateLinkButton = document.getElementById("generateLinkButton");
+const generatedLinkDiv = document.getElementById("generatedLink");
 
+generateLinkButton.addEventListener("click", () => {
+  const sharableLink = generateSharableLink(stlModel);
+  generatedLinkDiv.innerHTML = `<a href="${sharableLink}" target="_blank">${sharableLink}</a>`;
+});
 
 
     // Load the font for text labels
@@ -459,7 +475,65 @@ export default function Three() {
       renderer.render(scene, camera);
       updateTextLabels(); // Update the positions of text labels
     }
+
+    
+
     animate();
 
   }, []);
 }
+
+// Serialization, Deserialization and Application of State
+export const serializeModelState = (model) => {
+  const state = {
+    position: model.position.toArray(),
+    rotation: model.rotation.toArray(),
+    scale: model.scale.toArray(),
+    material: {
+      color: model.material.color.getHex(),
+      wireframe: model.material.wireframe,
+      shininess: model.material.shininess,
+      opacity: model.material.opacity,
+      transparent: model.material.transparent,
+    },
+    imagePath: model.imagePath,
+    
+  };
+  return JSON.stringify(state);
+};
+
+export const generateSharableLink = (model) => {
+  const serializedState = serializeModelState(model);
+  const encodedState = encodeURIComponent(serializedState);
+  // const baseUrl = window.location.origin + window.location.pathname;
+  // const sharableUrl = `${baseUrl}?state=${encodedState}`;
+  const baseUrl = "http://localhost:3001/dental/";
+  const sharableUrl = `${baseUrl}`+ encodedState;
+  console.log("Sharable URL:", sharableUrl);                                       
+  return sharableUrl;
+};
+
+export const deserializeModelState = (encodedState) => {
+  const decodedState = decodeURIComponent(encodedState);
+  return JSON.parse(decodedState);
+};
+
+export const applyModelState = (model, state) => {
+  model.position.fromArray(state.position);
+  model.rotation.fromArray(state.rotation);
+  model.scale.fromArray(state.scale);
+  model.material.color.setHex(state.material.color);
+  model.material.wireframe = state.material.wireframe;
+  model.material.shininess = state.material.shininess;
+  model.material.opacity = state.material.opacity;
+  model.material.transparent = state.material.transparent;
+};
+
+export const initializeSceneFromUrl = (stlModel) => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('state')) {
+    const serializedState = urlParams.get('state');
+    const state = deserializeModelState(serializedState);
+    applyModelState(stlModel, state);
+  }
+};

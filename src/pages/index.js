@@ -10,7 +10,7 @@ export default function Home() {
         {/* Main Content Area */}
         
 
-<div className="flex flex-col-reverse bg-white md:flex-row">
+<div className="flex flex-col-reverse bg-white space-x-7 md:flex-row">
   <div className="p-4 m-3 md:basis-3/4">
     <h1 className="my-3 text-4xl text-center text-gray-900">
       Welcome to our Free Dental STL Viewer
@@ -33,7 +33,7 @@ export default function Home() {
       <li>Access your files from anywhere, at any time.</li>
     </ul>
   </div>
-  <div className="m-3 bg-blue-400 basis-full md:basis-1/4">lorem</div>
+  <div className="m-3 basis-full md:basis-1/4">lorem</div>
 </div>
 <div className="flex justify-center bg-white md:flex-row">
   <div className="flex justify-center m-3 md:basis-full">
