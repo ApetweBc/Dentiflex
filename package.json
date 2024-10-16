@@ -10,8 +10,9 @@
   },
   "dependencies": {
     "dat.gui": "^0.7.9",
+    "formidable": "^3.5.1",
     "multer": "^1.4.5-lts.1",
-    "next": "14.2.3",
+    "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",

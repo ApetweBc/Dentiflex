@@ -1,68 +1,234 @@
-import { NextResponse } from "next/server";
-import path from "path";
-import { writeFile } from "fs/promises";
+// import path from "path";
+// import { writeFile } from "fs/promises";
 
-export const POST = async (req, res) => {
-  try {
-    // Extract formData from the request
-    const formData = await req.formData();
-    const file = formData.get("file");
+// // Use edge runtime
+// export const runtime = "edge";
 
-    // Check if a file was uploaded
-    if (!file) {
-      return NextResponse.json({ error: "No files received." }, { status: 400 });
-    }
+// const handler = async (req) => {
+//   if (req.method === "POST") {
+//     try {
+//       // Extract formData from the request
+//       const formData = await req.formData();
+//       const file = formData.get("file");
 
-    // Convert file to a buffer
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const filename = file.name.replaceAll(" ", "_");
-    const filePath = path.join(process.cwd(), "./public/uploads", filename);
+//       // Check if a file was uploaded
+//       if (!file) {
+//         return new Response(JSON.stringify({ error: "No files received." }), {
+//           status: 400,
+//           headers: { "Content-Type": "application/json" },
+//         });
+//       }
 
-    // Write the file to the server
-    await writeFile(filePath, buffer);
+//       // Convert file to a buffer
+//       const buffer = Buffer.from(await file.arrayBuffer());
+//       const filename = file.name.replace(/ /g, "_"); // Replace spaces with underscores
+//       const filePath = path.join(process.cwd(), "public/uploads", filename); // Path to save the file
 
-    // Respond with a success message and the file path
-    return NextResponse.json({ message: "Success", filePath: `/uploads/${filename}` }, { status: 201 });
-  } catch (error) {
-    // Log and return error
-    console.error("Error occurred:", error);
-    return NextResponse.json({ message: "Failed", error: error.message }, { status: 500 });
-  }
-};
+//       // Write the file to the server
+//       await writeFile(filePath, buffer);
 
-// import { promises as fsPromises } from 'fs';
-// import multer from 'multer';
-// import nextConnect from 'next-connect';
-// import path from 'path';
+//       // Respond with a success message and the file path
+//       return new Response(
+//         JSON.stringify({ message: "Success", filePath: `/uploads/${filename}` }),
+//         {
+//           status: 201,
+//           headers: { "Content-Type": "application/json" },
+//         }
+//       );
+//     } catch (error) {
+//       // Log and return error
+//       console.error("Error occurred:", error);
+//       return new Response(JSON.stringify({ message: "Failed", error: error.message }), {
+//         status: 500,
+//         headers: { "Content-Type": "application/json" },
+//       });
+//     }
+//   } else {
+//     return new Response(JSON.stringify({ error: "Method Not Allowed" }), {
+//       status: 405,
+//       headers: { "Content-Type": "application/json" },
+//     });
+//   }
+// };
 
-// const upload = multer({
-//   storage: multer.diskStorage({
-//     destination: './public/uploads',
-//     filename: (req, file, cb) => {
-//       cb(null, file.originalname.replace(/ /g, '_')); // Replace spaces in filenames with underscores
-//     },
-//   }),
-// });
+// export default handler;
 
-// const apiRoute = nextConnect({
-//   onError(error, req, res) {
-//     res.status(501).json({ error: `Sorry something went wrong! ${error.message}` });
-//   },
-//   onNoMatch(req, res) {
-//     res.status(405).json({ error: `Method '${req.method}' Not Allowed` });
-//   },
-// });
+// import { NextResponse } from "next/server";
+// import { writeFile } from "fs/promises";
 
-// apiRoute.use(upload.single('file'));
+// // Use nodejs runtime
+// export const runtime = "nodejs";
 
-// apiRoute.post(async (req, res) => {
-//   res.status(200).json({ message: 'File uploaded successfully', filePath: `/uploads/${req.file.filename}` });
-// });
-
-// export default apiRoute;
-
+// // Increase the body size limit to 50mb for this route
 // export const config = {
 //   api: {
-//     bodyParser: false, // Disallow body parsing, use multer instead
+//     bodyParser: {
+//       sizeLimit: '50mb',  // Adjust this value based on your needs
+//     },
 //   },
 // };
+
+// const handler = async (req) => {
+//   if (req.method === "POST") {
+//     try {
+//       // Extract formData from the request
+//       const formData = await req.formData();
+//       const file = formData.get("file");
+
+//       // Check if a file was uploaded
+//       if (!file) {
+//         return NextResponse.json({ error: "No files received." }, { status: 400 });
+//       }
+
+//       // Convert file to a buffer
+//       const buffer = Buffer.from(await file.arrayBuffer());
+//       const filename = file.name.replace(/ /g, "_"); // Replace spaces with underscores
+      
+//       // Use the public directory for uploads
+//       const filePath = `./public/uploads/${filename}`; // Define the file path relative to public/uploads
+
+//       // Write the file to the server
+//       await writeFile(filePath, buffer);
+
+//       return NextResponse.json({ message: "Success", filePath: `/uploads/${filename}` }, { status: 201 });
+//     } catch (error) {
+//       // Log and return error
+//       console.error("Error occurred:", error);
+//       return NextResponse.json({ message: "Failed", error: error.message }, { status: 500 });
+//     }
+//   } else {
+//     return NextResponse.json({ error: "Method Not Allowed" }, { status: 405 });
+//   }
+// };
+
+// export default handler;
+// Working Example
+// import { IncomingForm } from "formidable";
+// import path from "path";
+
+// // Use nodejs runtime
+// export const runtime = "nodejs";
+
+// // Disable body parsing, as formidable will handle it
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// };
+
+// const handler = async (req, res) => {
+//   if (req.method === "POST") {
+//     const form = new IncomingForm({
+//       uploadDir: path.join(process.cwd(), "public/uploads"),
+//       keepExtensions: true,
+//       maxFileSize: 50 * 1024 * 1024, // 50MB
+//     });
+
+//     form.parse(req, (err, files) => {
+//       if (err) {
+//         console.error("Error occurred:", err);
+//         return res.status(500).json({ message: "Failed", error: err.message });
+//       }
+
+//       const file = files.file;
+//       if (!file) {
+//         return res.status(400).json({ error: "No files received." });
+//       }
+
+//       // Get the current date and time
+//       const currentTime = Date.now();
+      
+//       // Safely access originalFilename and check if it's a string
+//       const filename = file.originalFilename && typeof file.originalFilename === 'string'
+//         ? file.originalFilename.replace(/ /g, "_") // Replace spaces with underscores and add timestamp
+//         : "default_filename"; // Fallback if originalFilename is undefined or not a string
+
+//         // Add the timestamp to the filename
+//         const timestampedFilename = `${currentTime}_${filename}`;
+
+//       const filePath = path.join("/uploads", timestampedFilename);
+//        console.log("The Uploaded file:", timestampedFilename);
+//       return res.status(201).json({ message: "Success", filePath });
+//     });
+//   } else {
+//     return res.status(405).json({ error: "Method Not Allowed" });
+//   }
+// };
+
+// export default handler;
+
+import { IncomingForm } from "formidable";
+import fs from "fs";
+import path from "path";
+
+// Use nodejs runtime
+export const runtime = "nodejs";
+
+// Disable body parsing, as formidable will handle it
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+const handler = async (req, res) => {
+  if (req.method === "POST") {
+    const form = new IncomingForm({
+      uploadDir: path.join(process.cwd(), "public/uploads"),
+      keepExtensions: true,
+      maxFileSize: 50 * 1024 * 1024, // 50MB
+    });
+
+    // Use fileBegin to customize the file's name
+    form.on("fileBegin", (name, file) => {
+      // Generate a timestamp
+      const timestamp = Date.now();
+
+      // Safely get the original filename and remove spaces
+      const originalFilename = file.originalFilename && typeof file.originalFilename === 'string'
+        ? file.originalFilename.replace(/ /g, "_")
+        : "default_filename";
+
+     // Construct the custom filename
+     const filename = `${timestamp}_${originalFilename}`;
+
+     // Define the full path where the file will be saved
+     const uploadPath = path.join(process.cwd(), "public/uploads", filename);
+
+     // Check if the directory exists, if not, create it
+     if (!fs.existsSync(path.join(process.cwd(), "public/uploads"))) {
+       fs.mkdirSync(path.join(process.cwd(), "public/uploads"), { recursive: true });
+     }
+
+     // Set the file's path
+     file.filepath = uploadPath;
+
+   }).parse(req, (err, fields, files) => {
+    if (err) {
+      return res.status(500).json({ message: "File parsing failed", error: err.message });
+    }
+
+    const file = files.file;
+    if (!file) {
+      return res.status(400).json({ error: "No file received." });
+    }
+
+    // Ensure file has been uploaded
+    if (!file[0].filepath) {
+      return res.status(500).json({ error: "Filepath not set properly." });
+    }
+
+    try {
+      // Ensure file path is a valid string
+      const filePath = `/uploads/${path.basename(file[0].filepath)}`;
+      return res.status(201).json({ message: "Success", filePath });
+    } catch (error) {
+      return res.status(500).json({ message: "File path processing failed", error: error.message });
+    }
+  });
+} else {
+  return res.status(405).json({ error: "Method Not Allowed" });
+}
+};
+
+export default handler;

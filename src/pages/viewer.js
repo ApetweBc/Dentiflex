@@ -20,19 +20,36 @@ const handleFilesAccepted = (files) => {
        //const nameOfFile = file.name;
        const formData = new FormData();
        formData.append("file", file);
-       fetch("./api/upload.js", {
+       fetch("/api/upload", {
          method: "POST",
          body: formData,
          
        })
          .then((response) => response.json())
          .then((result) => {
-           console.log("Success:", result);
-           const loadSTLEvent = new CustomEvent('loadSTL', { detail: { arrayBuffer, filePath } });
+           const loadSTLEvent = new CustomEvent('loadSTL', { detail: { arrayBuffer, filePath: result.filePath } });
            document.dispatchEvent(loadSTLEvent);
+           console.log("File uploaded successfully", result.filePath);
+           toast.success("File uploaded successfully", {
+              position: "top-left",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              theme: "colored",
+              icon: false,
+            });
          })
          .catch((error) => {
-           console.error("Error:", error);
+           toast.error("Failed to upload file", {
+              position: "top-left",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              theme: "colored",
+              icon: false,
+            });
          });
       };
       reader.readAsArrayBuffer(file);

@@ -10,7 +10,7 @@ export default function Dropzone({ onFilesAccepted }) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: ['.stl'],
-    multiple: true,
+    multiple: false,
     maxFiles: 1,
     type: 'application/octet-stream',
   });
