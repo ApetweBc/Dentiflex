@@ -183,6 +183,18 @@ const handler = async (req, res) => {
     form.on("fileBegin", (name, file) => {
       // Generate a timestamp
       const timestamp = Date.now();
+      // Convert the timestamp to a readable date format
+      const dateObject = new Date(timestamp);
+      
+      const year = dateObject.getFullYear();
+      const month = String(dateObject.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+      const day = String(dateObject.getDate()).padStart(2, '0');
+      const hours = String(dateObject.getHours()).padStart(2, '0');
+      const minutes = String(dateObject.getMinutes()).padStart(2, '0');
+      const seconds = String(dateObject.getSeconds()).padStart(2, '0');
+      
+      // Format the date as YYYY_MM_DD_HH_MM_SS
+      const formattedDate = `${year}_${month}_${day}_${hours}_${minutes}_${seconds}`;
 
       // Safely get the original filename and remove spaces
       const originalFilename = file.originalFilename && typeof file.originalFilename === 'string'
@@ -190,7 +202,7 @@ const handler = async (req, res) => {
         : "default_filename";
 
      // Construct the custom filename
-     const filename = `${timestamp}_${originalFilename}`;
+     const filename = `${formattedDate}_${originalFilename}`;
 
      // Define the full path where the file will be saved
      const uploadPath = path.join(process.cwd(), "public/uploads", filename);

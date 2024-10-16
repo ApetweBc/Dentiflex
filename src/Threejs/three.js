@@ -12,6 +12,7 @@ import { MeshBasicMaterial } from "three/src/materials/MeshBasicMaterial";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { SphereGeometry } from "three/src/geometries/SphereGeometry";
+import { toast } from "react-toastify";
 
 let gui;
 let stlModel;
@@ -510,6 +511,15 @@ export const generateSharableLink = (model) => {
   const baseUrl = "http://localhost:3001/dental/";
   const sharableUrl = `${baseUrl}`+ encodedState;
   console.log("Sharable URL:", sharableUrl);                                       
+  toast.success("Link generated successfully", {
+    position: "top-left",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    theme: "colored",
+    icon: false
+  });
   return sharableUrl;
 };
 
