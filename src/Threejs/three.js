@@ -2,7 +2,6 @@ import * as THREE from "three";
 
 import React, { useEffect } from "react";
 
-import { DragControls } from "three/addons/controls/DragControls.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 import { Line2 } from "three/examples/jsm/lines/Line2";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
@@ -14,30 +13,49 @@ import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { SphereGeometry } from "three/src/geometries/SphereGeometry";
 import { toast } from "react-toastify";
 
+// import { DragControls } from "three/addons/controls/DragControls.js";
+
+
+
+
+
+
+
+
+
+
+
 let gui;
-let stlModel;
-let textLabels = []; // Store text labels for measurements
-let spheres = []; // Store references to the spheres
-let geometry; // Define geometry outside the load function
-let togglematerial;
+// let stlModel;
+// Store text labels for measurements
+// let textLabels = []; 
+// Store references to the spheres
+// let spheres = [];
+// Define geometry outside the load function
+// let geometry; 
+// let togglematerial;
 let measurementObjects = [];
 // Initialize the renderer
-let material; // Define material outside the load function
+// Define material outside the load function
+// let material;
 let rendered = false;
-// let draggableSpheres = []; // Array to hold draggable spheres
-// let dragControls; // To handle drag controls
-let line; // To store the line object
+// Array to hold draggable spheres
+// let draggableSpheres = []; 
+// To handle drag controls
+// let dragControls;
+// To store the line object
+// let line; 
 
 
 export default function Three() {
   useEffect(() => {
     const initDat = async () => {
-      const dat = await import("dat.gui");
+      const {GUI}= await import("dat.gui");
       // Prevent multiple instances of dat.GUI
       if (gui) {
         gui.destroy();
       }
-      gui = new dat.GUI();
+      gui = new GUI();
 
       // Create function throttle to limit the number of calls dat.GUI makes
 
