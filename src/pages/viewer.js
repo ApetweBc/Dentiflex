@@ -87,7 +87,8 @@ export default function Viewer() {
        <Logo />
        <div id="linkContainer" className="absolute bottom-4 left-10">
         <button id="generateLinkButton" className="px-3 text-white bg-lime-500" >Generate Shareable Link</button>
-        <div id="generatedLink"></div>
+        <button id="copyLinkButton" className="px-3 text-black bg-white" >Copy Link</button>
+        <div id="generatedLink"className="hidden Visibility:" ></div>
       </div>
       <canvas id="myThreeJsCanva" />
     </main>

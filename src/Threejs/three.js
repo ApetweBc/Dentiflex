@@ -235,6 +235,7 @@ export default function Three() {
         const {arrayBuffer, filePath} = event.detail;
         loadSTLFile(arrayBuffer, filePath);
         // console the file path  
+        console.log("The file path", filePath);
       });
       
       
@@ -378,13 +379,41 @@ export default function Three() {
 // Add Event Listener to Generate Shareable Link Button
 const generateLinkButton = document.getElementById("generateLinkButton");
 const generatedLinkDiv = document.getElementById("generatedLink");
+const copyLinkButton = document.getElementById("copyLinkButton");
 
 generateLinkButton.addEventListener("click", () => {
+  if (!stlModel) {
+    toast.error("No model loaded", {
+      position: "top-left",
+      autoClose: 500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      theme: "colored",
+      icon: false
+    });
+    return;
+  }
   const sharableLink = generateSharableLink(stlModel);
   generatedLinkDiv.innerHTML = `<a href="${sharableLink}" target="_blank">${sharableLink}</a>`;
 });
 
-
+// Add Event Listener to Copy Link Button
+copyLinkButton.addEventListener("click", () => {
+  if (!generatedLinkDiv.querySelector("a")) {
+    toast.error("No link generated", {
+      position: "top-left",
+      autoClose: 500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      theme: "colored",
+      icon: false
+    });
+    return;
+  }
+  copySharableLink(generatedLinkDiv.querySelector("a").href);
+});
     // Load the font for text labels
     const fontLoader = new FontLoader();
     let font;
@@ -503,6 +532,7 @@ export const serializeModelState = (model) => {
   return JSON.stringify(state);
 };
 
+// Function to generate a sharable link
 export const generateSharableLink = (model) => {
   const serializedState = serializeModelState(model);
   const encodedState = encodeURIComponent(serializedState);
@@ -510,7 +540,6 @@ export const generateSharableLink = (model) => {
   // const sharableUrl = `${baseUrl}?state=${encodedState}`;
   const baseUrl = "http://localhost:3001/dental/";
   const sharableUrl = `${baseUrl}`+ encodedState;
-  console.log("Sharable URL:", sharableUrl);                                       
   toast.success("Link generated successfully", {
     position: "top-left",
     autoClose: 5000,
@@ -520,7 +549,22 @@ export const generateSharableLink = (model) => {
     theme: "colored",
     icon: false
   });
+  console.log("Sharable URL:", sharableUrl);                                       
   return sharableUrl;
+};
+
+// Funtion to copy the sharable link to the clipboard
+export const copySharableLink = (sharableLink) => {
+  navigator.clipboard.writeText(sharableLink);
+  toast.success("Link copied to clipboard", {
+    position: "top-left",
+    autoClose: 2000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    theme: "colored",
+    icon: false
+  });
 };
 
 export const deserializeModelState = (encodedState) => {

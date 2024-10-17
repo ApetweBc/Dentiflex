@@ -3,6 +3,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@/api/fileupload": ["./src/pages/api/fileupload.js"]
-    }
+    },
+    "baseUrl": "./"
   }
 }
