@@ -246,14 +246,17 @@ export default function Three() {
         const scaleFactor = 50 / maxDimension;
         stlModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
         stlModel.rotation.set(0, 0, 0);
+        stlModel.filePath = filePath;
         scene.add(stlModel);
       };
-
+ 
+       
       document.addEventListener('loadSTL', (event) => {
         const {arrayBuffer, filePath} = event.detail;
         loadSTLFile(arrayBuffer, filePath);
         // console the file path  
         console.log("The file path", filePath);
+        
       });
       
       
@@ -531,7 +534,87 @@ copyLinkButton.addEventListener("click", () => {
   }, []);
 }
 
-// Serialization, Deserialization and Application of State
+// // Serialization, Deserialization and Application of State
+// export const serializeModelState = (model) => {
+//   const state = {
+//     position: model.position.toArray(),
+//     rotation: model.rotation.toArray(),
+//     scale: model.scale.toArray(),
+//     material: {
+//       color: model.material.color.getHex(),
+//       wireframe: model.material.wireframe,
+//       shininess: model.material.shininess,
+//       opacity: model.material.opacity,
+//       transparent: model.material.transparent,
+//     },
+//     imagePath: model.imagePath,
+    
+//   };
+//   return JSON.stringify(state);
+// };
+
+// // Function to generate a sharable link
+// export const generateSharableLink = (model) => {
+//   const serializedState = serializeModelState(model);
+//   const encodedState = encodeURIComponent(serializedState);
+//   // const baseUrl = window.location.origin + window.location.pathname;
+//   // const sharableUrl = `${baseUrl}?state=${encodedState}`;
+//   const baseUrl = "http://localhost:3001/dental/";
+//   const sharableUrl = `${baseUrl}`+ encodedState;
+//   toast.success("Link generated successfully", {
+//     position: "top-left",
+//     autoClose: 5000,
+//     hideProgressBar: false,
+//     closeOnClick: true,
+//     pauseOnHover: true,
+//     theme: "colored",
+//     icon: false
+//   });
+//   console.log("Sharable URL:", sharableUrl);                                       
+//   return sharableUrl;
+// };
+
+// // Funtion to copy the sharable link to the clipboard
+// export const copySharableLink = (sharableLink) => {
+//   navigator.clipboard.writeText(sharableLink);
+//   toast.success("Link copied to clipboard", {
+//     position: "top-left",
+//     autoClose: 2000,
+//     hideProgressBar: false,
+//     closeOnClick: true,
+//     pauseOnHover: true,
+//     theme: "colored",
+//     icon: false
+//   });
+// };
+
+// export const deserializeModelState = (encodedState) => {
+//   const decodedState = decodeURIComponent(encodedState);
+//   return JSON.parse(decodedState);
+// };
+
+// export const applyModelState = (model, state) => {
+//   model.position.fromArray(state.position);
+//   model.rotation.fromArray(state.rotation);
+//   model.scale.fromArray(state.scale);
+//   model.material.color.setHex(state.material.color);
+//   model.material.wireframe = state.material.wireframe;
+//   model.material.shininess = state.material.shininess;
+//   model.material.opacity = state.material.opacity;
+//   model.material.transparent = state.material.transparent;
+// };
+
+// export const initializeSceneFromUrl = (stlModel) => {
+//   const urlParams = new URLSearchParams(window.location.search);
+//   if (urlParams.has('state')) {
+//     const serializedState = urlParams.get('state');
+//     const state = deserializeModelState(serializedState);
+//     applyModelState(stlModel, state);
+//   }
+// };
+
+
+// Serialization, Deserialization, and Application of State
 export const serializeModelState = (model) => {
   const state = {
     position: model.position.toArray(),
@@ -544,9 +627,10 @@ export const serializeModelState = (model) => {
       opacity: model.material.opacity,
       transparent: model.material.transparent,
     },
-    imagePath: model.imagePath,
-    
+   // store the file path in the state
+    imagePath: model.filePath
   };
+  // console.log("The file path", filePath);
   return JSON.stringify(state);
 };
 
@@ -554,10 +638,10 @@ export const serializeModelState = (model) => {
 export const generateSharableLink = (model) => {
   const serializedState = serializeModelState(model);
   const encodedState = encodeURIComponent(serializedState);
-  // const baseUrl = window.location.origin + window.location.pathname;
-  // const sharableUrl = `${baseUrl}?state=${encodedState}`;
-  const baseUrl = "http://localhost:3001/dental/";
-  const sharableUrl = `${baseUrl}`+ encodedState;
+  
+  const baseUrl = window.location.origin; // Uses the current domain dynamically
+  const sharableUrl = `${baseUrl}/shared?state=${encodedState}`;
+  
   toast.success("Link generated successfully", {
     position: "top-left",
     autoClose: 5000,
@@ -567,11 +651,12 @@ export const generateSharableLink = (model) => {
     theme: "colored",
     icon: false
   });
-  console.log("Sharable URL:", sharableUrl);                                       
+
+  console.log("Sharable URL:", sharableUrl);
   return sharableUrl;
 };
 
-// Funtion to copy the sharable link to the clipboard
+// Function to copy the sharable link to the clipboard
 export const copySharableLink = (sharableLink) => {
   navigator.clipboard.writeText(sharableLink);
   toast.success("Link copied to clipboard", {
@@ -585,27 +670,30 @@ export const copySharableLink = (sharableLink) => {
   });
 };
 
-export const deserializeModelState = (encodedState) => {
-  const decodedState = decodeURIComponent(encodedState);
-  return JSON.parse(decodedState);
-};
+// // Deserialize the model state from the URL
+// export const deserializeModelState = (encodedState) => {
+//   const decodedState = decodeURIComponent(encodedState);
+//   return JSON.parse(decodedState);
+// };
 
-export const applyModelState = (model, state) => {
-  model.position.fromArray(state.position);
-  model.rotation.fromArray(state.rotation);
-  model.scale.fromArray(state.scale);
-  model.material.color.setHex(state.material.color);
-  model.material.wireframe = state.material.wireframe;
-  model.material.shininess = state.material.shininess;
-  model.material.opacity = state.material.opacity;
-  model.material.transparent = state.material.transparent;
-};
+// // Apply the deserialized state to the model
+// export const applyModelState = (model, state) => {
+//   model.position.fromArray(state.position);
+//   model.rotation.fromArray(state.rotation);
+//   model.scale.fromArray(state.scale);
+//   model.material.color.setHex(state.material.color);
+//   model.material.wireframe = state.material.wireframe;
+//   model.material.shininess = state.material.shininess;
+//   model.material.opacity = state.material.opacity;
+//   model.material.transparent = state.material.transparent;
+// };
 
-export const initializeSceneFromUrl = (stlModel) => {
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has('state')) {
-    const serializedState = urlParams.get('state');
-    const state = deserializeModelState(serializedState);
-    applyModelState(stlModel, state);
-  }
-};
+// // Function to initialize scene from URL if state exists
+// export const initializeSceneFromUrl = (stlModel) => {
+//   const urlParams = new URLSearchParams(window.location.search);
+//   if (urlParams.has('state')) {
+//     const serializedState = urlParams.get('state');
+//     const state = deserializeModelState(serializedState);
+//     applyModelState(stlModel, state);
+//   }
+// };

@@ -4,7 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 
 import Dropzone from "@/Threejs/drop";
 import { Inter } from "next/font/google";
-import Logo from "./../Threejs/logo";
+import Logo from "../Threejs/logo";
 import Three from "@/Threejs/three";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -84,7 +84,7 @@ export default function Viewer() {
         height={239}
         className="absolute bottom-4 right-10"
       /> */}
-       <Logo />
+       {/* <Logo /> */}
        <div id="linkContainer" className="absolute bottom-4 left-10">
         <button id="generateLinkButton" className="px-3 text-white bg-lime-500" >Generate Shareable Link</button>
         <button id="copyLinkButton" className="px-3 text-black bg-white" >Copy Link</button>
