@@ -14,17 +14,6 @@ import { SphereGeometry } from "three/src/geometries/SphereGeometry";
 import { toast } from "react-toastify";
 
 // import { DragControls } from "three/addons/controls/DragControls.js";
-
-
-
-
-
-
-
-
-
-
-
 let gui;
 // let stlModel;
 // Store text labels for measurements
@@ -617,11 +606,11 @@ copyLinkButton.addEventListener("click", () => {
 // Serialization, Deserialization, and Application of State
 export const serializeModelState = (model) => {
   const state = {
-    position: model.position.toArray(),
-    rotation: model.rotation.toArray(),
-    scale: model.scale.toArray(),
+    // position: model.position.toArray(),
+    // rotation: model.rotation.toArray(),
+    // scale: model.scale.toArray(),
     material: {
-      color: model.material.color.getHex(),
+      color: model.material.color.getHex().toString(16),
       wireframe: model.material.wireframe,
       shininess: model.material.shininess,
       opacity: model.material.opacity,
@@ -670,30 +659,3 @@ export const copySharableLink = (sharableLink) => {
   });
 };
 
-// // Deserialize the model state from the URL
-// export const deserializeModelState = (encodedState) => {
-//   const decodedState = decodeURIComponent(encodedState);
-//   return JSON.parse(decodedState);
-// };
-
-// // Apply the deserialized state to the model
-// export const applyModelState = (model, state) => {
-//   model.position.fromArray(state.position);
-//   model.rotation.fromArray(state.rotation);
-//   model.scale.fromArray(state.scale);
-//   model.material.color.setHex(state.material.color);
-//   model.material.wireframe = state.material.wireframe;
-//   model.material.shininess = state.material.shininess;
-//   model.material.opacity = state.material.opacity;
-//   model.material.transparent = state.material.transparent;
-// };
-
-// // Function to initialize scene from URL if state exists
-// export const initializeSceneFromUrl = (stlModel) => {
-//   const urlParams = new URLSearchParams(window.location.search);
-//   if (urlParams.has('state')) {
-//     const serializedState = urlParams.get('state');
-//     const state = deserializeModelState(serializedState);
-//     applyModelState(stlModel, state);
-//   }
-// };
