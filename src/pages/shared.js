@@ -1,9 +1,11 @@
 import * as THREE from "three";
 
+import { ToastContainer, toast } from "react-toastify";
 import { useEffect, useRef } from "react";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
+import processOldFiles from "@/Threejs/processOldFiles";
 import { useRouter } from "next/router";
 
 // Function to deserialize the model state from the URL
@@ -143,7 +145,7 @@ const setupThreeJS = (container, serializedState, router) => {
   
   
   const state = deserializeModelState(serializedState);
-  applyModelState(model, state, router);
+  applyModelState(model, state);
 
 
  // Resize the renderer when the window is resized
@@ -172,25 +174,52 @@ const setupThreeJS = (container, serializedState, router) => {
 const SharedPage = () => {
   const router = useRouter();
   const containerRef = useRef(null);
+    
+ 
 
+  
   useEffect(() => {
     if (!router.isReady) {
       return; // Wait until the router is ready and the query parameters are populated
     }
-
+    
     const { state } = router.query;
-    if (state && Object.keys(state).length > 0 && containerRef.current) {
-      console.log("State:", state);
+    // const fileName = state;
+    
+  
+    let parsedState;
+    if (typeof state === "string") {
+      try {
+        parsedState = JSON.parse(state);
+      } catch (e) {
+        console.error("Failed to parse state:", e);
+      }
+    } else {
+      parsedState = state;
+    }
+    const filePath = parsedState?.imagePath;
+    const fileName =  filePath.replace("/uploads/","");
+
+    // Check if the file has expired
+    const isExpired = processOldFiles(fileName); 
+    
+    if (state && Object.keys(state).length > 0 && containerRef.current && !isExpired) {
       setupThreeJS(containerRef.current, state); // Parse state if it's a stringified object
     } else {
-      router.push("/"); // Redirect to homepage
+      // Notify the User that the file has expired
+      // Toast notification
+      router.push("/", 
+      ); // Redirect to homepage
     }
   }, [router, router.isReady, router.query]);
 
   return (
+     <main>
     <div>
+      <ToastContainer className={"z-50"} />
       <canvas ref={containerRef} />
     </div>
+     </main>
   );
 };
 
