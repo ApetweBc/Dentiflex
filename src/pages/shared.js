@@ -30,33 +30,23 @@ const applyModelState = (model, state) => {
   const color = `#${state.material.color}`;
   const material = new THREE.MeshPhongMaterial({
     color: new THREE.Color(color),
-    wireframe: state.material.wireframe,
+    specular: 0x888888,
     shininess: state.material.shininess,
-    opacity: state.material.opacity,
-    transparent: state.material.transparent,
     side: THREE.DoubleSide,
     emissive: 0x000000,
+    emissiveIntensity: 1,
+    wireframe: state.material.wireframe,
+    transparent: state.material.transparent,
+    opacity: state.material.opacity,
     depthWrite: true,
     depthTest: true,
-    emissiveIntensity: 1,
   });
 
-  console.log("Material Properties:", {
-    color: material.color,
-    wireframe: material.wireframe,
-    shininess: material.shininess,
-    opacity: material.opacity,
-    transparent: material.transparent,
-  });
   const modelWithMaterial = { model, material };
-
   // Load the STL file from the filePath if provided
   if (state.imagePath) {
     // let replaceString = state.imagePath.replace("/uploads/", "");
     loadModelFromFile(state.imagePath, modelWithMaterial);
-    
-
-    
   }
 };
 
@@ -65,9 +55,8 @@ const loadModelFromFile = (filePath, {model, material}) => {
   const loader = new STLLoader();
   loader.load(filePath, (geometry) => {
     const stlModel = new THREE.Mesh(geometry, material);
-    console.log("Mesh:", material);
-
     // Add the loaded model to the scene
+    console.log("mateial", material);
     geometry.computeBoundingBox();
     const boundingBox = geometry.boundingBox;
     const center = new THREE.Vector3();
@@ -96,7 +85,7 @@ const setupThreeJS = (container, serializedState, router) => {
     window.innerWidth / window.innerHeight,
     0.1,
     1000);
-  camera.position.set(0, 0, 5);
+  camera.position.set(0, 0, 50);
   camera.lookAt(0, 0, 0);
   const canvas = document.querySelector("canvas");
   const renderer = new THREE.WebGLRenderer({
@@ -155,7 +144,6 @@ const setupThreeJS = (container, serializedState, router) => {
   renderer.setSize(width, height);
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
-// stlModel = new THREE.Mesh(geometry, solidMaterial);
   });
 
   // Render loop
@@ -168,16 +156,11 @@ const setupThreeJS = (container, serializedState, router) => {
   animate();
 };
 
-
-
 // Main component for the Shared page
 const SharedPage = () => {
   const router = useRouter();
   const containerRef = useRef(null);
     
- 
-
-  
   useEffect(() => {
     if (!router.isReady) {
       return; // Wait until the router is ready and the query parameters are populated
@@ -186,7 +169,6 @@ const SharedPage = () => {
     const { state } = router.query;
     // const fileName = state;
     
-  
     let parsedState;
     if (typeof state === "string") {
       try {
@@ -222,9 +204,5 @@ const SharedPage = () => {
      </main>
   );
 };
-
-
-
-
 
 export default SharedPage;
