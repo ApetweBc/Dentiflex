@@ -37,3 +37,4 @@ next-env.d.ts
 
 # Uploader folder
 /public/uploads
+.qodo
