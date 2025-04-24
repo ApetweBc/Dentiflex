@@ -17,11 +17,11 @@ import { toast } from "react-toastify";
 let gui;
 // let stlModel;
 // Store text labels for measurements
-// let textLabels = []; 
+// let textLabels = [];
 // Store references to the spheres
 // let spheres = [];
 // Define geometry outside the load function
-// let geometry; 
+// let geometry;
 // let togglematerial;
 let measurementObjects = [];
 // Initialize the renderer
@@ -29,17 +29,16 @@ let measurementObjects = [];
 // let material;
 let rendered = false;
 // Array to hold draggable spheres
-// let draggableSpheres = []; 
+// let draggableSpheres = [];
 // To handle drag controls
 // let dragControls;
 // To store the line object
-// let line; 
-
+// let line;
 
 export default function Three() {
   useEffect(() => {
     const initDat = async () => {
-      const {GUI}= await import("dat.gui");
+      const { GUI } = await import("dat.gui");
       // Prevent multiple instances of dat.GUI
       if (gui) {
         gui.destroy();
@@ -51,7 +50,7 @@ export default function Three() {
       // Add Dat.GUI controls
       const controlFolder = gui.addFolder("Controls");
       controlFolder.open();
-      console.log("stlModel", stlModel);
+
       // Change rotation of the model
       controlFolder
         .add(stlModel.rotation, "x", -Math.PI, Math.PI)
@@ -114,13 +113,8 @@ export default function Three() {
         .onChange(clearMeasurements);
 
       // Reset the camera position using a button
-      controlFolder
-        .add(obj, "add")
-        .name("Reset Camera")
-        .onChange(resetCamera);
-
+      controlFolder.add(obj, "add").name("Reset Camera").onChange(resetCamera);
     };
-    
 
     if (rendered) return;
     rendered = true;
@@ -159,17 +153,16 @@ export default function Three() {
     directionalLight2.position.set(-1, -1, 1).normalize();
     scene.add(directionalLight2);
 
-
     // Initialize OrbitControls for moving the model
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true; // Optional, for smoother motion
     controls.dampingFactor = 0.25; // Optional, for smoother motion
     controls.screenSpacePanning = false; // Optional, for panning in screen space
     controls.minDistance = 40; // Set minDistance to the desired distance
-    controls.maxDistance= 300; // Set maxDistance to the same value to lock zoom level
+    controls.maxDistance = 300; // Set maxDistance to the same value to lock zoom level
     controls.enableZoom = true; // Enable zooming
     controls.enablePan = true; // Enable panning
-   
+
     controls.mouseButtons = {
       LEFT: THREE.MOUSE.ROTATE,
       MIDDLE: THREE.MOUSE.DOLLY,
@@ -179,7 +172,7 @@ export default function Three() {
     controls.zoomSpeed = 1.0; // Set zoom speed
     controls.panSpeed = 1.0; // Set pan speed
     controls.target.set(0, 0, 0); // Set the camera target
-  
+
     // Function to reset the camera position
     function resetCamera() {
       controls.reset();
@@ -200,7 +193,7 @@ export default function Three() {
       transparent: false,
       opacity: 1, // Full opacity
       depthWrite: true,
-      depthTest: true
+      depthTest: true,
     });
 
     const xrayMaterial = new THREE.MeshPhongMaterial({
@@ -213,51 +206,41 @@ export default function Three() {
       opacity: 0.5, // Adjust opacity for x-ray effect
     });
 
+    const loadSTLFile = (arrayBuffer, filePath) => {
+      const geometry = stlLoader.parse(arrayBuffer);
+      // Clear the scene before loading a new model
+      if (stlModel) {
+        scene.remove(stlModel);
+        scene.remove(...measurementObjects);
+        // Clear all measurements
+        measurementObjects = [];
+        // Clear all text labels
+        textLabels.forEach(({ div }) => {
+          document.body.removeChild(div);
+        });
+        textLabels = [];
+      }
+      stlModel = new THREE.Mesh(geometry, solidMaterial);
 
-    const loadSTLFile = (arrayBuffer, filePath ) => {
-      
-        const geometry = stlLoader.parse(arrayBuffer);
-        // Clear the scene before loading a new model
-        if (stlModel) {
-          scene.remove(stlModel);
-          scene.remove(...measurementObjects);
-          // Clear all measurements
-          measurementObjects = [];
-          // Clear all text labels
-          textLabels.forEach(({ div }) => {
-            document.body.removeChild(div);
-          });
-          textLabels = [];
-        
+      initDat();
+      geometry.computeBoundingBox();
+      const boundingBox = geometry.boundingBox;
+      const center = new THREE.Vector3();
+      boundingBox.getCenter(center);
+      geometry.center();
+      const size = boundingBox.getSize(new THREE.Vector3());
+      const maxDimension = Math.max(size.x, size.y, size.z);
+      const scaleFactor = 50 / maxDimension;
+      stlModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
+      stlModel.rotation.set(0, 0, 0);
+      stlModel.filePath = filePath;
+      scene.add(stlModel);
+    };
 
-        }
-        stlModel = new THREE.Mesh(geometry, solidMaterial);
-      
-            initDat();
-        geometry.computeBoundingBox();
-        const boundingBox = geometry.boundingBox;
-        const center = new THREE.Vector3();
-        boundingBox.getCenter(center);
-        geometry.center();
-        const size = boundingBox.getSize(new THREE.Vector3());
-        const maxDimension = Math.max(size.x, size.y, size.z);
-        const scaleFactor = 50 / maxDimension;
-        stlModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        stlModel.rotation.set(0, 0, 0);
-        stlModel.filePath = filePath;
-        scene.add(stlModel);
-      };
- 
-       
-      document.addEventListener('loadSTL', (event) => {
-        const {arrayBuffer, filePath} = event.detail;
-        loadSTLFile(arrayBuffer, filePath);
-  
-        
-      });
-      
-      
-
+    document.addEventListener("loadSTL", (event) => {
+      const { arrayBuffer, filePath } = event.detail;
+      loadSTLFile(arrayBuffer, filePath);
+    });
 
     // Limit the canvas size to fit within the window
     window.addEventListener("resize", function () {
@@ -266,8 +249,8 @@ export default function Three() {
       renderer.setSize(width, height);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
-    // stlModel = new THREE.Mesh(geometry, solidMaterial);
-      });
+      // stlModel = new THREE.Mesh(geometry, solidMaterial);
+    });
     // Raycaster for picking points
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
@@ -288,7 +271,7 @@ export default function Three() {
           createSphere(point, 0xff0000);
         } else if (points.length === 2) {
           const distance = points[0].distanceTo(points[1]);
-        
+
           createLine(points[0], points[1]);
           const midpoint = points[0].clone().add(points[1]).divideScalar(2);
           create2TextLabel(distance.toFixed(2) + " mm", midpoint);
@@ -338,7 +321,7 @@ export default function Three() {
 
       // // Add Line to the measurement group
       // measurementGroup.add(line);
-      
+
       // Store the line in the measurementObjects array
       measurementObjects.push(line);
       measurementObjects.push(sphere2);
@@ -356,22 +339,21 @@ export default function Three() {
       sphere1.position.copy(position);
       sphere1.renderOrder = 1000; // Ensure the sphere is rendered after the line
       scene.add(sphere1);
- 
+
       // draggableSpheres.push(sphere1); // Add sphere to draggableSpheres array
       // measurementGroup.add(sphere1); // Add sphere to the measurement group
       // Store the sphere in the measurementObjects array
       measurementObjects.push(sphere1);
     }
 
-
     // function updateMeasurement() {
     //   if (draggableSpheres.length < 2) return; // Ensure there are at least two spheres
-    
+
     //   const point1 = draggableSpheres[0].position;
     //   const point2 = draggableSpheres[1].position;
     //   const distance = point1.distanceTo(point2);
     //   console.log("Updated Distance:", distance);
-    
+
     // // Update line geometry
     // if (line) {
     //   const positions = line.geometry.attributes.position.array;
@@ -394,44 +376,44 @@ export default function Three() {
     //   }
     // }
 
-// Add Event Listener to Generate Shareable Link Button
-const generateLinkButton = document.getElementById("generateLinkButton");
-const generatedLinkDiv = document.getElementById("generatedLink");
-const copyLinkButton = document.getElementById("copyLinkButton");
+    // Add Event Listener to Generate Shareable Link Button
+    const generateLinkButton = document.getElementById("generateLinkButton");
+    const generatedLinkDiv = document.getElementById("generatedLink");
+    const copyLinkButton = document.getElementById("copyLinkButton");
 
-generateLinkButton.addEventListener("click", () => {
-  if (!stlModel) {
-    toast.error("No model loaded", {
-      position: "top-left",
-      autoClose: 500,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      theme: "colored",
-      icon: false
+    generateLinkButton.addEventListener("click", () => {
+      if (!stlModel) {
+        toast.error("No model loaded", {
+          position: "top-left",
+          autoClose: 500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          theme: "colored",
+          icon: false,
+        });
+        return;
+      }
+      const sharableLink = generateSharableLink(stlModel);
+      generatedLinkDiv.innerHTML = `<a href="${sharableLink}" target="_blank">${sharableLink}</a>`;
     });
-    return;
-  }
-  const sharableLink = generateSharableLink(stlModel);
-  generatedLinkDiv.innerHTML = `<a href="${sharableLink}" target="_blank">${sharableLink}</a>`;
-});
 
-// Add Event Listener to Copy Link Button
-copyLinkButton.addEventListener("click", () => {
-  if (!generatedLinkDiv.querySelector("a")) {
-    toast.error("No link generated", {
-      position: "top-left",
-      autoClose: 500,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      theme: "colored",
-      icon: false
+    // Add Event Listener to Copy Link Button
+    copyLinkButton.addEventListener("click", () => {
+      if (!generatedLinkDiv.querySelector("a")) {
+        toast.error("No link generated", {
+          position: "top-left",
+          autoClose: 500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          theme: "colored",
+          icon: false,
+        });
+        return;
+      }
+      copySharableLink(generatedLinkDiv.querySelector("a").href);
     });
-    return;
-  }
-  copySharableLink(generatedLinkDiv.querySelector("a").href);
-});
     // Load the font for text labels
     const fontLoader = new FontLoader();
     let font;
@@ -484,22 +466,21 @@ copyLinkButton.addEventListener("click", () => {
       });
     }
 
-     // Initialize DragControls for draggable spheres
-//  dragControls = new DragControls(draggableSpheres, camera, renderer.domElement);
+    // Initialize DragControls for draggable spheres
+    //  dragControls = new DragControls(draggableSpheres, camera, renderer.domElement);
 
-//  dragControls.addEventListener('dragstart', function (event) {
-//    controls.enabled = false; // Disable OrbitControls while dragging
-//     // disable creating new measurements while dragging 
-   
+    //  dragControls.addEventListener('dragstart', function (event) {
+    //    controls.enabled = false; // Disable OrbitControls while dragging
+    //     // disable creating new measurements while dragging
 
-//  });
+    //  });
 
-//  dragControls.addEventListener('dragend', function (event) {
-//    controls.enabled = false; // Enable OrbitControls after dragging
-//    updateMeasurement(); // Recalculate measurement after dragging
-//    // disable creating new measurements while dragging
-    
-//  });
+    //  dragControls.addEventListener('dragend', function (event) {
+    //    controls.enabled = false; // Enable OrbitControls after dragging
+    //    updateMeasurement(); // Recalculate measurement after dragging
+    //    // disable creating new measurements while dragging
+
+    //  });
 
     // Function to clear all measurements
     function clearMeasurements() {
@@ -524,13 +505,9 @@ copyLinkButton.addEventListener("click", () => {
       updateTextLabels(); // Update the positions of text labels
     }
 
-    
-
     animate();
-
   }, []);
 }
-
 
 // Serialization, Deserialization, and Application of State
 export const serializeModelState = (model) => {
@@ -545,8 +522,8 @@ export const serializeModelState = (model) => {
       opacity: model.material.opacity,
       transparent: model.material.transparent,
     },
-   // store the file path in the state
-    imagePath: model.filePath
+    // store the file path in the state
+    imagePath: model.filePath,
   };
   return JSON.stringify(state);
 };
@@ -555,10 +532,10 @@ export const serializeModelState = (model) => {
 export const generateSharableLink = (model) => {
   const serializedState = serializeModelState(model);
   const encodedState = encodeURIComponent(serializedState);
-  
+
   const baseUrl = window.location.origin; // Uses the current domain dynamically
   const sharableUrl = `${baseUrl}/shared?state=${encodedState}`;
-  
+
   toast.success("Link generated successfully", {
     position: "top-left",
     autoClose: 5000,
@@ -566,10 +543,9 @@ export const generateSharableLink = (model) => {
     closeOnClick: true,
     pauseOnHover: true,
     theme: "colored",
-    icon: false
+    icon: false,
   });
 
-  
   return sharableUrl;
 };
 
@@ -583,7 +559,6 @@ export const copySharableLink = (sharableLink) => {
     closeOnClick: true,
     pauseOnHover: true,
     theme: "colored",
-    icon: false
+    icon: false,
   });
 };
-

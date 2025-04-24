@@ -7,29 +7,90 @@ import { Inter } from "next/font/google";
 import Three from "@/Threejs/three";
 
 const inter = Inter({ subsets: ["latin"] });
+
+// This for the local upload of the file
+// const handleFilesAccepted = (files) => {
+//   files.forEach((file) => {
+//     if (file.name.endsWith(".stl")) {
+//       const reader = new FileReader();
+//       reader.onload = (e) => {
+//         const arrayBuffer = e.target.result;
+//         const filePath = file.name;
+//         console.log("Filepath:", filePath);
+//         //  Want to store the file to the server
+//         //const nameOfFile = file.name;
+//         const formData = new FormData();
+//         formData.append("file", file);
+//         fetch("/api/upload", {
+//           method: "POST",
+//           body: formData,
+//         })
+//           .then((response) => response.json())
+//           .then((result) => {
+//             const loadSTLEvent = new CustomEvent("loadSTL", {
+//               detail: { arrayBuffer, filePath: result.filePath },
+//             });
+//             document.dispatchEvent(loadSTLEvent);
+//             console.log("File uploaded successfully", result.filePath);
+//             toast.success("File uploaded successfully", {
+//               position: "top-left",
+//               autoClose: 5000,
+//               hideProgressBar: false,
+//               closeOnClick: true,
+//               pauseOnHover: true,
+//               theme: "colored",
+//               icon: false,
+//             });
+//           })
+//           .catch((error) => {
+//             toast.error("Failed to upload file", {
+//               position: "top-left",
+//               autoClose: 5000,
+//               hideProgressBar: false,
+//               closeOnClick: true,
+//               pauseOnHover: true,
+//               theme: "colored",
+//               icon: false,
+//             });
+//           });
+//       };
+//       reader.readAsArrayBuffer(file);
+//     } else {
+//       toast.error("Invalid file type, upload stl files", {
+//         position: "top-left",
+//         autoClose: 5000,
+//         hideProgressBar: false,
+//         closeOnClick: true,
+//         pauseOnHover: true,
+//         theme: "colored",
+//         icon: false,
+//       });
+//     }
+//   });
+// };
+
+// This is for the upload of the file to the S3 bucket
 const handleFilesAccepted = (files) => {
   files.forEach((file) => {
     if (file.name.endsWith(".stl")) {
       const reader = new FileReader();
       reader.onload = (e) => {
         const arrayBuffer = e.target.result;
-        const filePath = file.name;
-        console.log("Filepath:", filePath);
-        //  Want to store the file to the server
-        //const nameOfFile = file.name;
         const formData = new FormData();
         formData.append("file", file);
-        fetch("/api/upload", {
+        // Change the endpoint to the local upload if you are not using S3
+        fetch("/api/s3upload", {
           method: "POST",
           body: formData,
         })
           .then((response) => response.json())
           .then((result) => {
+            // Handle success
             const loadSTLEvent = new CustomEvent("loadSTL", {
-              detail: { arrayBuffer, filePath: result.filePath },
+              detail: { arrayBuffer, filePath: result.fileUrl },
             });
             document.dispatchEvent(loadSTLEvent);
-            console.log("File uploaded successfully", result.filePath);
+
             toast.success("File uploaded successfully", {
               position: "top-left",
               autoClose: 5000,

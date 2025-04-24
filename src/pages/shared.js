@@ -44,38 +44,102 @@ const applyModelState = (model, state) => {
   const modelWithMaterial = { model, material };
   // Load the STL file from the filePath if provided
   if (state.imagePath) {
-    // let replaceString = state.imagePath.replace("/uploads/", "");
     loadModelFromFile(state.imagePath, modelWithMaterial);
   }
 };
 
-// Function to load and render the STL model from the filePath
-const loadModelFromFile = (filePath, { model, material }) => {
-  const loader = new STLLoader();
-  loader.load(filePath, (geometry) => {
-    const stlModel = new THREE.Mesh(geometry, material);
-    // Add the loaded model to the scene
-    console.log("material", material);
-    geometry.computeBoundingBox();
-    const boundingBox = geometry.boundingBox;
-    const center = new THREE.Vector3();
-    boundingBox.getCenter(center);
-    geometry.center();
-    const size = boundingBox.getSize(new THREE.Vector3());
-    const maxDimension = Math.max(size.x, size.y, size.z);
-    const scaleFactor = 50 / maxDimension;
-    stlModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
+// Function to load and render the STL model from the local file
+// const loadModelFromFile = (filePath, { model, material }) => {
+//   const loader = new STLLoader();
+//   loader.load(filePath, (geometry) => {
+//     const stlModel = new THREE.Mesh(geometry, material);
+//     // Add the loaded model to the scene
+//     console.log("material", material);
+//     geometry.computeBoundingBox();
+//     const boundingBox = geometry.boundingBox;
+//     const center = new THREE.Vector3();
+//     boundingBox.getCenter(center);
+//     geometry.center();
+//     const size = boundingBox.getSize(new THREE.Vector3());
+//     const maxDimension = Math.max(size.x, size.y, size.z);
+//     const scaleFactor = 50 / maxDimension;
+//     stlModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
-    // center the model
-    stlModel.position.set(
-      -center.x * scaleFactor,
-      -center.y * scaleFactor,
-      -center.z * scaleFactor
+//     // center the model
+//     stlModel.position.set(
+//       -center.x * scaleFactor,
+//       -center.y * scaleFactor,
+//       -center.z * scaleFactor
+//     );
+//     model.add(stlModel);
+//   });
+// };
+
+// Function to load and render the STL model from the s3 bucket
+const loadModelFromFile = async (filePath, { model, material }) => {
+  try {
+    // Extract the object key from the S3 URL
+    const objectKey = filePath.split(".com/")[1];
+
+    // Get pre-signed URL
+    const response = await fetch(
+      `/api/s3presignedurl?objectKey=${encodeURIComponent(objectKey)}`
     );
-    model.add(stlModel);
-  });
-};
+    if (!response.ok) {
+      throw new Error("Failed to get signed URL");
+    }
 
+    const { signedUrl } = await response.json();
+
+    // Use the signed URL to load the model
+    const loader = new STLLoader();
+    loader.load(
+      signedUrl,
+      (geometry) => {
+        const stlModel = new THREE.Mesh(geometry, material);
+        // ...existing code...
+        geometry.computeBoundingBox();
+        const boundingBox = geometry.boundingBox;
+        const center = new THREE.Vector3();
+        boundingBox.getCenter(center);
+        geometry.center();
+        const size = boundingBox.getSize(new THREE.Vector3());
+        const maxDimension = Math.max(size.x, size.y, size.z);
+        const scaleFactor = 50 / maxDimension;
+        stlModel.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+        stlModel.position.set(
+          -center.x * scaleFactor,
+          -center.y * scaleFactor,
+          -center.z * scaleFactor
+        );
+        model.add(stlModel);
+      },
+      undefined,
+      (error) => {
+        console.error("Error loading STL:", error);
+        toast.error("Failed to load 3D model", {
+          position: "top-left",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          theme: "colored",
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error:", error);
+    toast.error("Failed to load 3D model", {
+      position: "top-left",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      theme: "colored",
+    });
+  }
+};
 // Three.js Scene Setup
 const setupThreeJS = (container, serializedState, router) => {
   const scene = new THREE.Scene();
@@ -163,7 +227,6 @@ const SharedPage = () => {
     }
 
     const { state } = router.query;
-    // const fileName = state;
 
     let parsedState;
     if (typeof state === "string") {

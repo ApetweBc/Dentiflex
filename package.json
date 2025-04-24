@@ -12,6 +12,10 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.787.0",
+    "@aws-sdk/s3-request-presigner": "^3.787.0",
+    "aws-sdk": "^2.1692.0",
+    "cors": "^2.8.5",
     "dat.gui": "^0.7.9",
     "formidable": "^3.5.1",
     "multer": "^1.4.5-lts.1",

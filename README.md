@@ -28,7 +28,16 @@ npm install
 yarn install
 ```
 
-2. Start the development server:
+2. Create .env file add:
+AWS_ACCESS_KEY_ID=*****
+AWS_SECRET_ACCESS_KEY=********
+AWS_REGION=********
+S3_BUCKET_NAME=********
+
+3. Build app npm run build
+
+
+4. Start the development server:
 
 ```bash
 npm run dev
@@ -36,7 +45,7 @@ npm run dev
 yarn dev
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
 
 ### Docker Deployment
 

@@ -38,3 +38,8 @@ next-env.d.ts
 # Uploader folder
 /public/uploads
 .qodo
+
+
+#Env files
+.env
+.env.development   
